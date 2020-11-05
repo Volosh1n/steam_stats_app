@@ -11,6 +11,7 @@ module Games
     def call
       games
         .yield_self(&method(:sort_clause))
+        .yield_self(&method(:rank_clause))
     end
 
     private
@@ -37,6 +38,14 @@ module Games
         statistics.peak_today
         -statistics.peak_today
       ]
+    end
+
+    def rank_clause(relation)
+      relation.select(
+        'games.*',
+        'rank() OVER (ORDER BY statistics.current_players DESC) AS current_online_rank',
+        'rank() OVER (ORDER BY statistics.peak_today DESC) AS peak_online_rank'
+      )
     end
   end
 end

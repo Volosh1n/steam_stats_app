@@ -11,9 +11,13 @@
         = link_to t('.peak_today'), games_path(sort: '-statistics.peak_today')
       - else
         = link_to t('.peak_today'), games_path(sort: 'statistics.peak_today')
+    %th= t('.current_online_rank')
+    %th= t('.peak_online_rank')
   %tbody
     - @games.each do |game|
       %tr
         %td= game.name
         %td= game.statistics.last.current_players
         %td= game.statistics.last.peak_today
+        %td= game.current_online_rank
+        %td= game.peak_online_rank

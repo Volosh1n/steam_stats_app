@@ -4,3 +4,5 @@ en:
       game_name: Game name
       current_players: Current players
       peak_today: Peak today
+      current_online_rank: Current online rank
+      peak_online_rank: Peak online rank
