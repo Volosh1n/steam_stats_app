@@ -13,8 +13,8 @@ namespace :games do
         [
           cells.css('a').text,
           {
-            current_players: cells.shift.css('span').text,
-            peak_today: cells.css('span').text
+            current_players: cells.shift.css('span').text.delete(',').to_i,
+            peak_today: cells.css('span').text.delete(',').to_i
           }
         ]
       end

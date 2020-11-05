@@ -4,14 +4,15 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.6.6'
 
 gem 'bootsnap', '>= 1.4.2', require: false
+gem 'haml-rails'
 gem 'jbuilder', '~> 2.7'
+gem 'nokogiri'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 4.1'
 gem 'rails', '~> 6.0.3', '>= 6.0.3.4'
 gem 'sass-rails', '>= 6'
 gem 'turbolinks', '~> 5'
 gem 'webpacker', '~> 4.0'
-gem 'nokogiri'
 
 group :development, :test do
   gem 'factory_bot_rails'
@@ -30,6 +31,7 @@ group :development do
 end
 
 group :test do
+  gem 'rails-controller-testing'
   gem 'rspec-rails'
   gem 'shoulda-matchers'
 end
