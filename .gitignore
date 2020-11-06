@@ -37,3 +37,6 @@ yarn-debug.log*
 
 # Ignore coverage
 coverage
+
+# Ignore dip bundle
+/.docker-development/bundle

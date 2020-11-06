@@ -1,0 +1,69 @@
+# Required minimum dip version
+version: '4.1'
+
+environment:
+  RAILS_ENV: development
+
+compose:
+  files:
+    - ./.docker-development/docker-compose.yml
+  project_name: steam_stats_app
+
+interaction:
+  bash:
+    description: Open the Bash shell in app's container
+    service: backend
+    command: bash
+    compose:
+      run_options: [no-deps]
+
+  bundle:
+    description: Run Bundler commands
+    service: backend
+    command: bundle
+
+  rake:
+    description: Run Rake commands
+    service: backend
+    command: bundle exec rake
+
+  rspec:
+    description: Run Rspec commands
+    service: backend
+    environment:
+      RAILS_ENV: test
+    command: bundle exec rspec
+
+  rails:
+    description: Run Rails commands
+    service: backend
+    command: bundle exec rails
+    subcommands:
+      s:
+        description: Run Rails server at http://localhost:3000
+        service: rails
+        compose:
+          run_options: [service-ports, use-aliases]
+
+  # sidekiq:
+  #   description: Run sidekiq in background
+  #   service: sidekiq
+  #   compose:
+  #     method: up
+  #     # run_options: [detach] # comment this if you want to run sidekiq in interactive mode
+
+  rubocop:
+    description: Run rubocop
+    service: backend
+    command: bundle exec rubocop -P
+
+  psql:
+    description: Run Postgres psql console
+    service: backend
+    default_args: db_dev
+    command: psql -h postgres -U postgres -d steam_stats_app_development
+
+provision:
+  - dip compose down --volumes
+  - dip compose up -d postgres redis
+  - dip bash -c ./bin/setup

@@ -1,0 +1,79 @@
+version: '3.1'
+
+volumes:
+  postgres:
+  redis:
+  bundle:
+  rails_cache:
+
+services:
+  app: &app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        RUBY_VERSION: '2.6.6'
+        PG_MAJOR: '12'
+        BUNDLER_VERSION: '2.1.2'
+    image: steam_stats_app:1.0.6
+    tmpfs:
+      - /tmp
+
+  backend: &backend
+    <<: *app
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../:/home/steam_stats_app/app
+      - rails_cache:/home/steam_stats_app/app/tmp/cache
+    environment: &backend_environment
+      RAILS_ENV: ${RAILS_ENV:-development}
+      REDIS_URL: redis://redis:6379/
+      REDIS_POOL_SIZE: 25
+      PG_USERNAME: postgres
+      PG_PASSWORD: postgres
+      PG_HOST: postgres
+      PG_PORT: 5432
+      BOOTSNAP_CACHE_DIR: /usr/local/bundle/_bootsnap
+      HISTFILE: /home/steam_stats_app/app/log/.bash_history
+      PSQL_HISTFILE: /home/steam_stats_app/app/log/.psql_history
+      EDITOR: nano
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+      BUNDLE_PATH: /home/steam_stats_app/app/.docker-development/bundle
+      BUNDLE_CACHE_PATH: /home/steam_stats_app/app/.docker-development/bundle/cache
+    depends_on:
+      - postgres
+      - redis
+
+  runner:
+    <<: *backend
+    command: /bin/bash
+
+  rails:
+    <<: *backend
+    command: bundle exec rails server -b 0.0.0.0
+    ports:
+      - '3000:3000'
+
+  sidekiq:
+    <<: *backend
+    command: bundle exec sidekiq -C config/sidekiq.yml
+
+  postgres:
+    image: postgres:12-alpine
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ../log:/root/log
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PSQL_HISTFILE=/root/log/.psql_history
+    ports:
+      - 5432
+
+  redis:
+    image: redis:4-alpine
+    volumes:
+      - redis:/data
+    ports:
+      - 6379
